@@ -25,7 +25,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-MODEL = tf.keras.models.load_model("../models/pdds.h5")
+MODEL = tf.keras.models.load_model("../models/potatos_model.h5")
 
 Potato_class_names = ["Early Blight", "Healthy", "Late Blight"]
 
