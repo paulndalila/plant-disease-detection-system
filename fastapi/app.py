@@ -1,6 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 import uvicorn
 import numpy as np
 from io import BytesIO
@@ -23,8 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory="templates")
-
 MODEL = tf.keras.models.load_model("../models/pdds.keras")
 
 Potato_class_names = ["Early Blight", "Healthy", "Late Blight"]
@@ -32,10 +29,6 @@ Potato_class_names = ["Early Blight", "Healthy", "Late Blight"]
 @app.get("/ping")
 async def ping():
     return "Hello, I am alive"
-
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("upload.html", {"request": request})
 
 def read_file_as_image(data) -> np.ndarray:
     image = np.array(Image.open(BytesIO(data)))
