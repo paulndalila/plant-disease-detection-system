@@ -15,7 +15,3 @@ To run the system locally, follow these steps:
 1. Start the FastAPI Python server:
 ```bash
     uvicorn app:app --reload
-##
-1. Start the FastAPI Python server:
-```bash
-    uvicorn app:app --reload
