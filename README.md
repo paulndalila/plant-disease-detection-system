@@ -8,3 +8,7 @@ This project aims to assist farmers in detecting diseases in their crops using m
   <li><b>Drag and Drop Frontend:</b> Built with React JS, the frontend provides a user-friendly interface where users can upload images of crops, and receive instant feedback on their health status.</li>
   <li><b>API Integration:</b> Axios is utilized for seamless integration between the frontend and backend, ensuring efficient communication and data exchange.</li>
 </ul>
+
+# Usage
+```bash
+uvicorn app:app --reload
