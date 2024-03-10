@@ -14,10 +14,4 @@ To run the system locally, follow these steps:
 
 1. Start the FastAPI Python server:
 ```bash
-uvicorn app:app --reload
-
-2.Start the React frontend:
-```bash
-npm run dev
-
-3.Access the application via your browser.
+    uvicorn app:app --reload
