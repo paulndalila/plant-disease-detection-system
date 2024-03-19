@@ -174,6 +174,10 @@ nav .banner{
   object-fit: cover;
   overflow: hidden;
   border-radius: 5px;
+  max-height: 62vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #0086fe;
 }
 
@@ -283,6 +287,7 @@ footer a{
 
   .card .result .image{
     width: 60%;
+    max-height: 60vh;
   }
   
   .card .result .details{
