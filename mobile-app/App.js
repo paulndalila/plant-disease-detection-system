@@ -5,15 +5,24 @@ import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
 import { shareAsync } from 'expo-sharing';
 import { Camera, camera } from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
-import logo from './assets/iconn.png';
+import Welcome from './Welcome';
+import back1 from './assets/backa.jpg';
+import crop from './assets/crop.jpg';
+import leaf from './assets/leaf.png';
+import cameraIcon from './assets/camera.png';
+import galleryIcon from './assets/gallery.png';
+// import * as MediaLibrary from 'expo-media-library';
+import NavBar from './NavBar';
+import Footer from './Footer';
 
 export default function App() {
   const [image, setImage] = useState(null);
   const [loading, setLoading ] = useState(false);
   const [ cropClass, setCropClass ] = useState('');
-  const [isImageSet, setIsImageSet] = useState(false);
+  const [isImageSet, setIsImageSet] = useState(false);  
+  const [ resultsAvailable, setResultsAvailable] = useState(false);
   const [ cropAccuracy, setCropAccuracy ] = useState('');
+  const [ isCameraSet, setIsCameraSet ] = useState(false);
   const [ hasCameraPermission, setHasCameraPermission] = useState();
 
   let cameraRef = useRef();
@@ -41,7 +50,13 @@ export default function App() {
       const cameraPermission = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraPermission.status ==="granted");
     })();
-  },[]);
+
+    if(image){      
+      //console.log(image);
+      uploadImage();
+    }
+
+  },[isCameraSet, image]);
 
   if(hasCameraPermission === undefined){
     return <Text>Requesting permissions...</Text>
@@ -50,7 +65,7 @@ export default function App() {
   }
 
   //camera take pic
-  let takePic = async ()=>{
+  let takePic = async ()=>{   
     let options = {
       quality: 1,
       base64: true,
@@ -73,17 +88,19 @@ export default function App() {
         type: 'image/jpeg',
       });
 
-      const response = await axios.post('http://10.0.9.237:8000/predict', formData, {
+      const response = await axios.post('192.168.137.229:8000/predict', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-
+      setResultsAvailable(true);
       setCropClass(response.data.class);
       setCropAccuracy(response.data.accuracy);
+
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
+      console.log(image);
+      //Alert.alert('Error', 'Failed to upload image');
     } finally{
       setLoading(false);
     }
@@ -96,55 +113,101 @@ export default function App() {
     setCropClass('');
     setCropAccuracy('');
     setIsImageSet(false);
+    setResultsAvailable(false);
+    setIsCameraSet(false);
   }
-  
+
+  // camera button toggle
+  const toggleCamera = ()=>{
+    setIsCameraSet(true);
+  }
+
+  //converting accuracy to two decimal places
+  const accuracyCalc = (acc)=>{
+    const percentage = acc * 100;
+    return percentage.toFixed(2);
+  }  
 
   return (
     <>
-      { isImageSet?
-        <View style={styles.container}>
-          <StatusBar style="auto"/>
-          <View style={styles.navbar}>
-            <View style={styles.logo}>
-              <Image source={ logo } />
-              <Text style={styles.logoText}>Crop Oracle</Text>
-            </View>
-            <Text style={styles.logoHelpText}>Need help?</Text>
-          </View>
-          <View style={styles.banner}><Text style={styles.bannerText}>Crop Oracle is a plant disease detection system that detects diseases in plants by examining the crop leaf using machine learning.</Text></View>
-          
-          <View style={styles.body}>
-            
-          { isImageSet ? <View style={styles.buttonContainer}><Button title="Check crop status" onPress={uploadImage} /><Button title="select different crop" onPress={resetView} /></View> : ''}
-
-            { isImageSet ? <View style={styles.imageContainer}>
-                <Image source={ image } style={styles.image} /> 
-
-                { loading? <ActivityIndicator color='#017260' size='large'/> : ''}
-                <Text>Potato Health Status: {cropClass}</Text>
-                <Text>Accuracy: {cropAccuracy}</Text>
-              </View> : <View><Text style={styles.noImage}>No image selected</Text></View>}
-          </View>
-        </View>
-        :
+      { isCameraSet?
         <Camera style={styles.container} ref={cameraRef}>
           <StatusBar style="auto"/>
           <View style={styles.buttonContainer}>
             <Button title='Take Pic' color='#1b1c1e' onPress={takePic}/>
             <Button title='Gallery' color='#1b1c1e' onPress={pickImage}/>
           </View>
-        </Camera>
-    }
+        </Camera>      
+      :
+        <View style={styles.container}>
+          <StatusBar style="auto"/>
+
+          <NavBar/>
+                    
+          <View style={styles.body}>
+              <Image source={ back1 } style={styles.backgroundImage}/>
+
+              <View style={styles.bodyFrame}>
+
+                <View style={styles.bodyFrameNavigationBar}>
+                  <View style={styles.bodyFrameTitle}> 
+                    <Image source={ leaf }/> 
+                    <Text style={styles.bodyFrameTitleText}>Potato Leaf</Text>                
+                  </View>
+
+                  <View style={styles.bodyFrameButtons}> 
+                    {/* <Image source={ galleryIcon } onPress={pickImage}/> 
+                    <Image source={ cameraIcon } onPress={toggleCamera}/>                 */}
+                    <Button title='Gallery' onPress={pickImage} />
+                    <Button title='Camera' onPress={toggleCamera} />
+                  </View>
+                </View>
+
+                { isImageSet?
+                  <>
+                    <View style={styles.imageContainer}>
+                      <Image source={ image } style={styles.image} />
+                    </View>
+                    
+                    { loading? <ActivityIndicator color='#017260' size='large'/> : ''}
+
+                    { resultsAvailable? 
+                      <>
+                        <Text>Results:</Text>
+                        <View style={styles.imageResults}>
+                          <Text style={styles.imageCResults}>{ cropClass }</Text>
+                          <Text style={styles.imageAResults}>{ accuracyCalc(cropAccuracy) }%</Text>
+                        </View>
+                      </>
+                    
+                      : 
+                      
+                      ''
+                    }
+                    
+                  </>
+
+                  : <Welcome/> 
+                }
+                            
+              </View>
+          </View>
+
+          <Footer/>
+        </View>
+      }
 
     </>
   );
 }
 
 const styles = StyleSheet.create({
+
+//container
   container: {
     flex: 1,
     paddingTop: 50,
-    backgroundColor: '#ffffffb2',
+    backgroundColor: '#fffffff',
   },
   buttonContainer:{
     paddingRight: 20,
@@ -156,58 +219,101 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  body:{
-    padding: 10,
+  imageContainer:{
+    height: 500,
+    overflow: 'hidden',
+    backgroundColor: 'plum',
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 4,
   },
+
   image: {
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: 10,
-    height: 500,
-    width: 380,
-    objectFit: 'contain',
+    height: '100%',
+    width: '100%',
+    objectFit: 'cover',
     paddingRight: 10,
     marginBottom: 10,
     borderRadius: 5,
   },
-  navbar:{
+
+  imageResults:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flex: 1,
+    marginBottom: 10,
+  },
+
+  imageCResults:{
+    fontSize: 40,
+    color: '#01493E',
+    fontWeight: 'bold',
+  },
+
+  imageAResults:{
+    width: '40%',
+    fontSize: 36,
+    color: '#D8323C',
+    fontWeight: 'bold',
+  },
+    
+  //body nav 
+  body:{
+    flex: 1,
+    position: 'relative',
+  },  
+
+  bodyFrame:{
+      width: '95%',
+      flex: 1,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      marginTop: 10,
+      marginBottom: 10,
+      borderRadius: 10,
+      borderColor: '#017260',
+      borderWidth: 2,
+      padding: 10,
+      backgroundColor: '#ffffffd2',
+  },
+
+  bodyFrameNavigationBar:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  bodyFrameTitle:{
+    gap: 5,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  logoText:{
-    fontSize: 26,
-    fontWeight: 'bold',
+
+  bodyFrameTitleText:{
     color: '#017260',
-    paddingTop: 8,
-  },
-  imageContainer:{
-    overflow: 'hidden',
-    borderRadius: 5,
-  },
-  logoHelpText:{
-    fontSize: 16,
-    paddingRight: 10,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#017260',
   },
-  logo: {
-    paddingLeft: 10,
+
+  bodyFrameButtons:{
+    gap: 10,
     display: 'flex',
     flexDirection: 'row',
+    alignItems: 'center',
   },
-  banner:{
-    padding: 10,
-    backgroundColor: '#017260',
+
+  backgroundImage:{
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    zIndex: -99,
   },
-  bannerText:{
-    color: '#fff',
-    textAlign: 'center',
-  },
-  noImage:{
-    textAlign: 'center',
-    padding: 10,
-    color: 'gray',
-  }
 });
