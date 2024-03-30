@@ -28,7 +28,7 @@ export default function App() {
   let cameraRef = useRef();
 
   //image selection from gallery
-  const pickImage = async (e) => {
+  const pickImage = async (e) => { 
     e.preventDefault();
 
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -38,9 +38,10 @@ export default function App() {
       quality: 1,
     });
 
-    if (!result.cancelled) {
+    if (!result.cancelled) { 
       setImage(result.assets[0]);
-      setIsImageSet(true);
+      setIsImageSet(true);              
+      setResultsAvailable(false);
     }
   };
 
@@ -51,12 +52,7 @@ export default function App() {
       setHasCameraPermission(cameraPermission.status ==="granted");
     })();
 
-    if(image){      
-      //console.log(image);
-      uploadImage();
-    }
-
-  },[isCameraSet, image]);
+  },[ ]);
 
   if(hasCameraPermission === undefined){
     return <Text>Requesting permissions...</Text>
@@ -66,43 +62,55 @@ export default function App() {
 
   //camera take pic
   let takePic = async ()=>{   
-    let options = {
-      quality: 1,
-      base64: true,
-      exif: false
-    };
-
-    let newPhoto = await cameraRef.current.takePictureAsync(options);
-    setImage(newPhoto);
-    setIsImageSet(true);
+    try{
+      let options = {
+        quality: 1,
+        base64: true,
+        exif: false
+      };
+  
+      let newPhoto = await cameraRef.current.takePictureAsync(options);
+      setImage(newPhoto);
+      setIsCameraSet(false);
+    }catch(error){
+      Alert.alert('Error', 'Failed to take pic');
+    }finally{
+      setIsImageSet(true);      
+      setIsCameraSet(false);             
+      setResultsAvailable(false);
+    }
   }
 
   //uploading to my backend api
   const uploadImage = async () => {
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append('file', {
-        name: 'image.jpg',
-        uri: image.uri,
-        type: 'image/jpeg',
-      });
-
-      const response = await axios.post('192.168.137.229:8000/predict', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      setResultsAvailable(true);
-      setCropClass(response.data.class);
-      setCropAccuracy(response.data.accuracy);
-
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      console.log(image);
-      //Alert.alert('Error', 'Failed to upload image');
-    } finally{
-      setLoading(false);
+    
+    if(image){
+      try {
+        setLoading(true);
+        const formData = new FormData();
+        formData.append('file', {
+          name: 'image.jpg',
+          uri: image.uri,
+          type: 'image/jpeg',
+        });
+  
+        const response = await axios.post('http://192.168.43.208:8000/predict', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        setCropClass(response.data.class);
+        setCropAccuracy(response.data.accuracy);
+        setResultsAvailable(true);
+  
+      } catch (error) {
+        //setLoading(true);
+        //console.error('Press the check button again')
+        //console.error('Error uploading image:', error);
+        //Alert.alert('Error', 'Failed to upload image');
+      } finally{
+        setLoading(false);
+      }
     }
 
   }
@@ -133,9 +141,13 @@ export default function App() {
       { isCameraSet?
         <Camera style={styles.container} ref={cameraRef}>
           <StatusBar style="auto"/>
+          <View style={styles.container}>
+
+          </View>
           <View style={styles.buttonContainer}>
-            <Button title='Take Pic' color='#1b1c1e' onPress={takePic}/>
             <Button title='Gallery' color='#1b1c1e' onPress={pickImage}/>
+            <Button title='Take Pic' color='#1b1c1e' onPress={takePic}/>
+            <Button title='Back' color='#1b1c1e' onPress={resetView}/>
           </View>
         </Camera>      
       :
@@ -158,8 +170,17 @@ export default function App() {
                   <View style={styles.bodyFrameButtons}> 
                     {/* <Image source={ galleryIcon } onPress={pickImage}/> 
                     <Image source={ cameraIcon } onPress={toggleCamera}/>                 */}
-                    <Button title='Gallery' onPress={pickImage} />
-                    <Button title='Camera' onPress={toggleCamera} />
+
+                    { resultsAvailable ? <><Button title='Gallery' onPress={pickImage} />
+                      <Button title='Camera' onPress={toggleCamera} /></>
+                      : 
+                      (image? <><Button title='Check' onPress={uploadImage} />
+                        <Button title='Refresh' onPress={resetView} /></> 
+                        : 
+                        <><Button title='Gallery' onPress={pickImage} />
+                        <Button title='Camera' onPress={toggleCamera} /></>
+                      )
+                    }
                   </View>
                 </View>
 
@@ -206,12 +227,12 @@ const styles = StyleSheet.create({
 //container
   container: {
     flex: 1,
-    paddingTop: 50,
-    backgroundColor: '#fffffff',
+    paddingTop: 30,
   },
   buttonContainer:{
-    paddingRight: 20,
-    paddingLeft: 20,
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingBottom: 20,
     borderRadius: 30,
     display: 'flex',
     flexDirection: 'row',
@@ -222,7 +243,7 @@ const styles = StyleSheet.create({
   imageContainer:{
     height: 500,
     overflow: 'hidden',
-    backgroundColor: 'plum',
+    //backgroundColor: '#017260',
     marginTop: 10,
     marginBottom: 10,
     borderRadius: 4,
@@ -233,7 +254,7 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
     height: '100%',
     width: '100%',
-    objectFit: 'cover',
+    objectFit: 'fill',
     paddingRight: 10,
     marginBottom: 10,
     borderRadius: 5,
