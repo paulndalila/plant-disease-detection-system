@@ -10,7 +10,7 @@ const Welcome = () => {
         <Text style={styles.bodyText}>Hello there!</Text>
         <Text style={styles.bodyText}>Welcome to Crop Oracle</Text>
       </View>
-      <Text style={styles.bodyPText}>Click the 'Gallery' to upload an image, or the 'Camera' button to take a picture</Text>
+      <Text style={styles.bodyPText}>Click the Gallery icon to upload an image, or the Camera icon to take a picture</Text>
       <Text style={styles.bodyFText}>Thank you for using Crop Oracle!</Text>
     </View>
   )

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, Button, Image, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, Image, Alert, ActivityIndicator } from 'react-native';
+import { Button } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
 import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
@@ -145,9 +147,9 @@ export default function App() {
 
           </View>
           <View style={styles.buttonContainer}>
-            <Button title='Gallery' color='#1b1c1e' onPress={pickImage}/>
-            <Button title='Take Pic' color='#1b1c1e' onPress={takePic}/>
-            <Button title='Back' color='#1b1c1e' onPress={resetView}/>
+            <Button icon={<Icon name="image" size={32} color="#fff" /> } type="clear" onPress={pickImage}/>
+            <Button icon={<Icon name="camera" size={55} color="#fff" /> } type="clear" onPress={takePic}/>
+            <Button icon={<Icon name="arrow-right" size={30} color="#fff" /> } type="clear" onPress={resetView}/>
           </View>
         </Camera>      
       :
@@ -168,17 +170,14 @@ export default function App() {
                   </View>
 
                   <View style={styles.bodyFrameButtons}> 
-                    {/* <Image source={ galleryIcon } onPress={pickImage}/> 
-                    <Image source={ cameraIcon } onPress={toggleCamera}/>                 */}
-
-                    { resultsAvailable ? <><Button title='Gallery' onPress={pickImage} />
-                      <Button title='Camera' onPress={toggleCamera} /></>
+                    { resultsAvailable ? <><Button icon={<Icon name="image" size={25} color="#017260" /> } onPress={pickImage} />
+                      <Button icon={<Icon name="camera" size={25} color="#017260" /> } onPress={toggleCamera} /></>
                       : 
-                      (image? <><Button title='Check' onPress={uploadImage} />
-                        <Button title='Refresh' onPress={resetView} /></> 
+                      (image? <><Button icon={<Icon name="upload" size={25} color="#017260" /> } type="clear" onPress={uploadImage} />
+                        <Button icon={<Icon name="undo" size={25} color="#017260" /> } type="clear" onPress={resetView} /></> 
                         : 
-                        <><Button title='Gallery' onPress={pickImage} />
-                        <Button title='Camera' onPress={toggleCamera} /></>
+                        <><Button icon={<Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />
+                        <Button icon={<Icon name="camera" size={25} color="#017260" /> } type="clear" onPress={toggleCamera} /></>
                       )
                     }
                   </View>
@@ -322,7 +321,7 @@ const styles = StyleSheet.create({
   },
 
   bodyFrameButtons:{
-    gap: 10,
+    gap: 5,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
