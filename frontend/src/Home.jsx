@@ -26,7 +26,7 @@ const Home = () => {
         setImage(URL.createObjectURL(files[0]));
 
         try {          
-            const response = await axios.post('http://localhost:8000/predict', formData);  
+            const response = await axios.post('https://paulndalila-backend-api.onrender.com/predict', formData);  
             setData(response.data);  
             setResult(true);         
 
@@ -65,7 +65,7 @@ const Home = () => {
         setImage(URL.createObjectURL(files[0]));
 
         try {          
-            const response = await axios.post('http://localhost:8000/predict', formData);  
+            const response = await axios.post('https://paulndalila-backend-api.onrender.com/predict', formData);  
             setData(response.data);
             setResult(true);
 
