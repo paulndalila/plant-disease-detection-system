@@ -63,6 +63,7 @@ const Home = () => {
 
   //uploading to my backend api
   const uploadImage = async () => {
+	console.log('starting fetch')
     try {
       setLoading(true);
       const formData = new FormData();
@@ -72,12 +73,13 @@ const Home = () => {
         type: 'image/jpeg',
       });
 
-      const response = await axios.post('http://10.0.9.237:8000/predict', formData, {
+      const response = await axios.post('http://16.171.64.119/predict', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
+	console.log('fetched')
       setCropClass(response.data.class);
       setCropAccuracy(response.data.accuracy);
     } catch (error) {
@@ -85,6 +87,7 @@ const Home = () => {
       Alert.alert('Error', 'Failed to upload image');
     } finally{
       setLoading(false);
+	console.log('done fetching')
     }
 
   }
@@ -116,13 +119,13 @@ const Home = () => {
         
         { isImageSet ? <View style={styles.buttonContainer}><Button title="Check crop status" onPress={uploadImage} /><Button title="select different crop" onPress={resetView} /></View> : ''}
 
-        { isImageSet ? <View style={styles.imageContainer}>
+        <View style={styles.imageContainer}>
             <Image source={ image } style={styles.image} /> 
 
             { loading? <ActivityIndicator color='#017260' size='large'/> : ''}
             <Text>Potato Health Status: {cropClass}</Text>
             <Text>Accuracy: {cropAccuracy}</Text>
-            </View> : <View><Text style={styles.noImage}>No image selected</Text></View>}
+          </View>
         </View>
     </View>
     :

@@ -95,8 +95,9 @@ export default function App() {
           uri: image.uri,
           type: 'image/jpeg',
         });
-  
-        const response = await axios.post('http://192.168.43.208:8000/predict', formData, {
+  	// backend hosted on render - https://paulndalila-backend-api.onrender.com/
+	//backend hosted on AWS EC2 instance - http://16.171.64.119
+        const response = await axios.post('http://16.171.64.119/predict', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
