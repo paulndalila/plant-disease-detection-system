@@ -5,13 +5,13 @@ import image_icon from "./images/img.png";
 import CircularProgress from '@mui/material/CircularProgress';
 
 const Home = () => {
-    const [image, setImage] = useState([]);
-    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     const [data, setData] = useState(null);
-    const [ result, setResult] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [ image, setImage ] = useState([]);
+    const [ result, setResult ] = useState(false);
+    const [ loading, setLoading ] = useState(false);
     const [ errorMsg, setErrorMsg ] = useState(null);
+    const [ isDragging, setIsDragging ] = useState(false);
 
     //browsed an image
     const onFileSelect = async (event) => {
