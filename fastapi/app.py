@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL = tf.keras.models.load_model("../models/pdds.keras")
+MODEL = tf.keras.models.load_model("../models/pdds.h5")
 
 Potato_class_names = ["Early Blight", "Healthy", "Late Blight"]
 
@@ -32,9 +32,20 @@ async def ping():
     return "Hello, I am alive"
 
 def read_file_as_image(data) -> np.ndarray:
-    image = np.array(Image.open(BytesIO(data)))
+    #image = np.array(Image.open(BytesIO(data)))
+    #return image
+    try:
+        # Open the image using PIL
+        img = Image.open(BytesIO(data))
+        # Resize the image to the desired size
+        resized_img = img.resize((256, 256))
+        # Convert the resized image to a NumPy array
+        img_array = np.array(resized_img)
+        return img_array
+    except Exception as e:
+        print("Error:", e)
+        return None
 
-    return image
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):

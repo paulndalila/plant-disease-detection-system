@@ -5,14 +5,14 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
 import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
-import { shareAsync } from 'expo-sharing';
+// import { shareAsync } from 'expo-sharing';
 import { Camera, camera } from 'expo-camera';
 import Welcome from './Welcome';
 import back1 from './assets/backa.jpg';
-import crop from './assets/crop.jpg';
+// import crop from './assets/crop.jpg';
 import leaf from './assets/leaf.png';
-import cameraIcon from './assets/camera.png';
-import galleryIcon from './assets/gallery.png';
+// import cameraIcon from './assets/camera.png';
+// import galleryIcon from './assets/gallery.png';
 // import * as MediaLibrary from 'expo-media-library';
 import NavBar from './NavBar';
 import Footer from './Footer';
@@ -95,8 +95,9 @@ export default function App() {
           uri: image.uri,
           type: 'image/jpeg',
         });
-  	// backend hosted on render - https://paulndalila-backend-api.onrender.com/
-	//backend hosted on AWS EC2 instance - http://16.171.64.119
+
+  	    // backend hosted on render - https://paulndalila-backend-api.onrender.com/
+	      //backend hosted on AWS EC2 instance - http://16.171.64.119
         const response = await axios.post('http://16.171.64.119/predict', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -107,10 +108,7 @@ export default function App() {
         setResultsAvailable(true);
   
       } catch (error) {
-        //setLoading(true);
-        //console.error('Press the check button again')
-        //console.error('Error uploading image:', error);
-        //Alert.alert('Error', 'Failed to upload image');
+        console.error('Error uploading image:', error);
       } finally{
         setLoading(false);
       }
@@ -171,10 +169,10 @@ export default function App() {
                   </View>
 
                   <View style={styles.bodyFrameButtons}> 
-                    { resultsAvailable ? <><Button icon={<Icon name="image" size={25} color="#017260" /> } onPress={pickImage} />
-                      <Button icon={<Icon name="camera" size={25} color="#017260" /> } onPress={toggleCamera} /></>
+                    { resultsAvailable ? <><Button icon={ <Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />
+                      <Button icon={<Icon name="camera" size={25} color="#017260" /> } type="clear" onPress={toggleCamera} /></>
                       : 
-                      (image? <><Button icon={<Icon name="upload" size={25} color="#017260" /> } type="clear" onPress={uploadImage} />
+                      (image? <><Button title="Check Status" color="#017260" onPress={uploadImage} />
                         <Button icon={<Icon name="undo" size={25} color="#017260" /> } type="clear" onPress={resetView} /></> 
                         : 
                         <><Button icon={<Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />

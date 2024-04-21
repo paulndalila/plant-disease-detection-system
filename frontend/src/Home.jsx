@@ -13,34 +13,44 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
     const [ errorMsg, setErrorMsg ] = useState(null);
 
-    const selectFiles = ()=>{
-        fileInputRef.current.click();
+    //browsed an image
+    const onFileSelect = async (event) => {
+        const image_file = event.target.files;
+        await loadData(image_file);
     }
 
-    const onFileSelect = async (event) => {
-        const files = event.target.files;
+    //Drag and drop from cursor
+    const onDrop = async(e)=>{
+        e.preventDefault();
+        setIsDragging(false);
+        const image_file = e.dataTransfer.files;
+        await loadData(image_file);
+    }
+
+    //pass the image onto the api for a prediction
+    const loadData = async (the_image)=>{
         setLoading(true);
         setErrorMsg(false);
         const formData = new FormData();
-        formData.append('file', files[0]);
-        setImage(URL.createObjectURL(files[0]));
+        formData.append('file', the_image[0]);
+        setImage(URL.createObjectURL(the_image[0]));
 
-        try {
-  	// backend hosted on render - https://paulndalila-backend-api.onrender.com/
-	//backend hosted on AWS EC2 instance - http://16.171.64.119
-
+        try {          
+            // backend hosted on render - https://paulndalila-backend-api.onrender.com/
+            //backend hosted on AWS EC2 instance - http://16.171.64.119
             const response = await axios.post('http://16.171.64.119/predict', formData);  
-            setData(response.data);  
-            setResult(true);         
+            setData(response.data);
+            setResult(true);
 
         } catch (error) {
             setErrorMsg(error.code);
-            //setErrorMsg(error.response.data.message);
         }finally{
             setLoading(false);
-            console.log('done');
         }
+    }
 
+    const selectFiles = ()=>{
+        fileInputRef.current.click();
     }
 
     function onDragOver(e){
@@ -53,33 +63,6 @@ const Home = () => {
         e.preventDefault();
         setIsDragging(false);
 
-    }
-
-    const onDrop = async(e)=>{
-        e.preventDefault();
-        setIsDragging(false);
-        setLoading(true);
-        setErrorMsg(false);
-
-        const files = e.dataTransfer.files;
-
-        const formData = new FormData();
-        formData.append('file', files[0]);
-        setImage(URL.createObjectURL(files[0]));
-
-        try {          
-  	// backend hosted on render - https://paulndalila-backend-api.onrender.com/
-	//backend hosted on AWS EC2 instance - http://16.171.64.119
-
-            const response = await axios.post('http://16.171.64.119/predict', formData);  
-            setData(response.data);
-            setResult(true);
-
-        } catch (error) {
-            setErrorMsg(error.code);
-        }finally{
-            setLoading(false);
-        }
     }
 
     const selectNewCrop = ()=>{
