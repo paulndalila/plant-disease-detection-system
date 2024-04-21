@@ -1,6 +1,9 @@
 # Plant Disease Detection System
 This project aims to assist farmers in detecting diseases in their crops using machine learning techniques. By leveraging image data of crops, the system can predict whether a crop is diseased or not, enabling early intervention and efficient agricultural management.
 
+# Check it out on
+Click this link to check it out: <a href="https://plant-disease-detection-system.vercel.app/">plant-disease-detection-system.paul_ndalila</a>
+
 #  Features
 <ul>
   <li><b>Machine Learning Model:</b> Trained using Jupyter Notebook, the model utilizes convolutional neural networks (CNNs) to classify images of crops into diseased or healthy categories.</li>
