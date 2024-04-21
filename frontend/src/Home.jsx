@@ -27,17 +27,71 @@ const Home = () => {
         await loadData(image_file);
     }
 
+    //compress the image to 256*256
+    async function compressImage(file, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (event) {
+                const image = new Image();
+                image.src = event.target.result;
+                image.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+    
+                    // Set canvas size to 256x256
+                    canvas.width = 256;
+                    canvas.height = 256;
+    
+                    // Resize image to fit 256x256
+                    ctx.drawImage(image, 0, 0, 256, 256);
+    
+                    // Convert canvas to compressed data URL
+                    const compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+    
+                    resolve(compressedDataURL);
+                };
+                image.onerror = function (error) {
+                    reject(error);
+                };
+            };
+            reader.onerror = function (error) {
+                reject(error);
+            };
+        });
+    }
+    
+    // Convert data URI of the compressed image to Blob
+    function dataURItoBlob(dataURI) {
+        const byteString = atob(dataURI.split(',')[1]);
+        const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], { type: mimeString });
+    }
+
+
     //pass the image onto the api for a prediction
     const loadData = async (the_image)=>{
         setLoading(true);
         setErrorMsg(false);
-        const formData = new FormData();
-        formData.append('file', the_image[0]);
-        setImage(URL.createObjectURL(the_image[0]));
+        // const formData = new FormData();
+        // formData.append('file', the_image[0]);
+        // setImage(URL.createObjectURL(the_image[0]));
 
-        try {          
+        try { 
+            const compressedImageDataURL = await compressImage(the_image[0], 1);
+    
+            const formData = new FormData();
+            formData.append('file', dataURItoBlob(compressedImageDataURL), 'compressed_image.jpg');
+            setImage(compressedImageDataURL);
+    
+            // Submit compressed image to the API     
             // backend hosted on render - https://paulndalila-backend-api.onrender.com/
-            //backend hosted on AWS EC2 instance - http://16.171.64.119
+            // backend hosted on AWS EC2 instance - http://16.171.64.119
             const response = await axios.post('http://16.171.64.119/predict', formData);  
             setData(response.data);
             setResult(true);
