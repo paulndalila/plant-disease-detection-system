@@ -5,26 +5,23 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
 import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
-// import { shareAsync } from 'expo-sharing';
 import { Camera, camera } from 'expo-camera';
 import Welcome from './Welcome';
 import back1 from './assets/backa.jpg';
-// import crop from './assets/crop.jpg';
 import leaf from './assets/leaf.png';
-// import cameraIcon from './assets/camera.png';
-// import galleryIcon from './assets/gallery.png';
-// import * as MediaLibrary from 'expo-media-library';
 import NavBar from './NavBar';
 import Footer from './Footer';
+import { manipulateAsync } from 'expo-image-manipulator';
 
 export default function App() {
   const [image, setImage] = useState(null);
+  const [ compressedImage, setCompressedImage ] = useState(null);
   const [loading, setLoading ] = useState(false);
   const [ cropClass, setCropClass ] = useState('');
   const [isImageSet, setIsImageSet] = useState(false);  
-  const [ resultsAvailable, setResultsAvailable] = useState(false);
   const [ cropAccuracy, setCropAccuracy ] = useState('');
   const [ isCameraSet, setIsCameraSet ] = useState(false);
+  const [ resultsAvailable, setResultsAvailable] = useState(false);
   const [ hasCameraPermission, setHasCameraPermission] = useState();
 
   let cameraRef = useRef();
@@ -32,7 +29,6 @@ export default function App() {
   //image selection from gallery
   const pickImage = async (e) => { 
     e.preventDefault();
-
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
@@ -40,9 +36,10 @@ export default function App() {
       quality: 1,
     });
 
-    if (!result.cancelled) { 
+    if (!result.cancelled) {
       setImage(result.assets[0]);
-      setIsImageSet(true);              
+      setIsImageSet(true);  
+      setIsCameraSet(false);             
       setResultsAvailable(false);
     }
   };
@@ -53,8 +50,30 @@ export default function App() {
       const cameraPermission = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraPermission.status ==="granted");
     })();
-
   },[ ]);
+
+  useEffect(()=>{
+    if(image !== null){
+      compressImage(image);
+    }
+  },[image])
+
+  const compressImage = async( uploaded_image ) => {
+    //console.log('starting compression')
+    try{
+      const compressed_image = await manipulateAsync(
+        uploaded_image.uri,
+        [{ resize: { width: 256, height: 256 } }],
+        { compress: 1, format: 'jpeg' }
+      );
+
+      setCompressedImage(compressed_image);
+      // console.log('compressedImage')
+      // console.log(compressed_image)
+    }catch(error){
+      console.error(error)
+    }
+  }
 
   if(hasCameraPermission === undefined){
     return <Text>Requesting permissions...</Text>
@@ -68,7 +87,7 @@ export default function App() {
       let options = {
         quality: 1,
         base64: true,
-        exif: false
+        exif: false,
       };
   
       let newPhoto = await cameraRef.current.takePictureAsync(options);
@@ -85,19 +104,19 @@ export default function App() {
 
   //uploading to my backend api
   const uploadImage = async () => {
-    
-    if(image){
+
+    if(compressedImage){
       try {
         setLoading(true);
         const formData = new FormData();
         formData.append('file', {
           name: 'image.jpg',
-          uri: image.uri,
+          uri: compressedImage.uri,
           type: 'image/jpeg',
         });
 
   	    // backend hosted on render - https://paulndalila-backend-api.onrender.com/
-	      //backend hosted on AWS EC2 instance - http://16.171.64.119
+	      // backend hosted on AWS EC2 instance - http://16.171.64.119
         const response = await axios.post('http://16.171.64.119/predict', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -139,9 +158,9 @@ export default function App() {
 
   return (
     <>
+      <StatusBar backgroundColor="#fff" barStyle="light-content" />
       { isCameraSet?
         <Camera style={styles.container} ref={cameraRef}>
-          <StatusBar style="auto"/>
           <View style={styles.container}>
 
           </View>
@@ -152,11 +171,8 @@ export default function App() {
           </View>
         </Camera>      
       :
-        <View style={styles.container}>
-          <StatusBar style="auto"/>
-
+        <View style={styles.contentContainer}>
           <NavBar/>
-                    
           <View style={styles.body}>
               <Image source={ back1 } style={styles.backgroundImage}/>
 
@@ -169,14 +185,23 @@ export default function App() {
                   </View>
 
                   <View style={styles.bodyFrameButtons}> 
-                    { resultsAvailable ? <><Button icon={ <Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />
-                      <Button icon={<Icon name="camera" size={25} color="#017260" /> } type="clear" onPress={toggleCamera} /></>
+                    { resultsAvailable ? 
+                      <>
+                        <Button icon={ <Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />
+                        <Button icon={<Icon name="camera" size={25} color="#017260" /> } type="clear" onPress={toggleCamera} />
+                        <Button icon={<Icon name="undo" size={25} color="#017260" /> } type="clear" onPress={resetView} />
+                      </>
                       : 
-                      (image? <><Button title="Check Status" color="#017260" onPress={uploadImage} />
-                        <Button icon={<Icon name="undo" size={25} color="#017260" /> } type="clear" onPress={resetView} /></> 
+                      (image? 
+                        <>
+                          <Button title="Check Status" color="#017260" onPress={uploadImage} />
+                          <Button icon={<Icon name="undo" size={25} color="#017260" /> } type="clear" onPress={resetView} />
+                        </> 
                         : 
-                        <><Button icon={<Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />
-                        <Button icon={<Icon name="camera" size={25} color="#017260" /> } type="clear" onPress={toggleCamera} /></>
+                        <>
+                          <Button icon={<Icon name="image" size={25} color="#017260" /> } type="clear" onPress={pickImage} />
+                          <Button icon={<Icon name="camera" size={25} color="#017260" /> } type="clear" onPress={toggleCamera} />
+                        </>
                       )
                     }
                   </View>
@@ -225,7 +250,11 @@ const styles = StyleSheet.create({
 //container
   container: {
     flex: 1,
-    paddingTop: 30,
+  },
+
+  contentContainer:{
+    flex: 1,
+    paddingTop: 40,
   },
   buttonContainer:{
     paddingRight: 10,
