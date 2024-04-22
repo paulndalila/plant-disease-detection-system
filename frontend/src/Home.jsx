@@ -9,6 +9,7 @@ const Home = () => {
     const [data, setData] = useState(null);
     const [ image, setImage ] = useState([]);
     const [ result, setResult ] = useState(false);
+    const [ isImage, setIsImage ] = useState(false);
     const [ loading, setLoading ] = useState(false);
     const [ errorMsg, setErrorMsg ] = useState(null);
     const [ isDragging, setIsDragging ] = useState(false);
@@ -78,9 +79,6 @@ const Home = () => {
     const loadData = async (the_image)=>{
         setLoading(true);
         setErrorMsg(false);
-        // const formData = new FormData();
-        // formData.append('file', the_image[0]);
-        // setImage(URL.createObjectURL(the_image[0]));
 
         try { 
             const compressedImageDataURL = await compressImage(the_image[0], 1);
@@ -93,7 +91,12 @@ const Home = () => {
             // backend hosted on render - https://paulndalila-backend-api.onrender.com/
             // backend hosted on AWS EC2 instance - http://16.171.64.119
             const response = await axios.post('http://16.171.64.119/predict', formData);  
-            setData(response.data);
+            if(response.data['class'] === '0' || response.data['accuracy'] === 0.0){
+                setIsImage(false);
+            }else{
+                setIsImage(true);
+                setData(response.data);
+            }
             setResult(true);
 
         } catch (error) {
@@ -144,19 +147,27 @@ const Home = () => {
                     <div className="drag_area result"  onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                         <div className="image"><img src={ image } alt="crop-img"/></div>
                         <div className="details">
-                            <div>
-                                <h3>Potato health status</h3>
-                                <hr/>
-                                <p className="class"><b>{ data['class'] }</b></p>
-                            </div>
-                            <div>
-                                <h3>Accuracy</h3>
-                                <hr/>
-                                <p className="accuracy"><b>{ accuracyCalc(data['accuracy']) }%</b></p>
-                            </div>
-                            <div className="btn">
-                                <button onClick={selectNewCrop}>Check another crop</button>
-                            </div>
+                            { isImage?
+                                <>
+                                    <div>
+                                        <h3>Potato health status</h3>
+                                        <hr/>
+                                        <p className="class"><b>{ data['class'] }</b></p>
+                                    </div>
+                                    <div>
+                                        <h3>Accuracy</h3>
+                                        <hr/>
+                                        <p className="accuracy"><b>{ accuracyCalc(data['accuracy']) }%</b></p>
+                                    </div>
+                                    <div className="btn">
+                                        <button onClick={selectNewCrop}>Check another crop</button>
+                                    </div>
+                                </>
+                                :
+                                <>
+                                    <h2 className="accuracy">Crop Oracle system did <u>not identify</u> the leaf in the image! <br/> Upload an image of a <u>crop leaf only</u> for <u>status detection</u>!</h2>
+                                </>                            
+                            }
                         </div>
                     </div> :
                         <div className="drag_area" onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
