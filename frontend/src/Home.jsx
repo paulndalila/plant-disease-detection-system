@@ -90,7 +90,7 @@ const Home = () => {
             // Submit compressed image to the API     
             // backend hosted on render - https://paulndalila-backend-api.onrender.com/
             // backend hosted on AWS EC2 instance - http://16.171.64.119
-            const response = await axios.post('http://16.171.64.119/predict', formData);  
+            const response = await axios.post('https://paulndalila-backend-api.onrender.com/predict', formData);  
             if(response.data['class'] === '0' || response.data['accuracy'] === 0.0){
                 setIsImage(false);
             }else{
