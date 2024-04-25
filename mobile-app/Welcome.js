@@ -11,6 +11,12 @@ const Welcome = () => {
         <Text style={styles.bodyText}>Welcome to Crop Oracle</Text>
       </View>
       <Text style={styles.bodyPText}>Click the Gallery icon to upload an image, or the Camera icon to take a picture</Text>
+      <View  style={styles.bodyPInfoText}>
+        <Text>Upload or take a photo</Text>
+        <Text>System checks if it is a crop-leaf first</Text>
+        <Text>If yes, it proceeds to disease detection</Text>
+        <Text>Then displays the results</Text>
+      </View>
       <Text style={styles.bodyFText}>Thank you for using Crop Oracle!</Text>
     </View>
   )
@@ -42,6 +48,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 
+  bodyPInfoText:{
+    display: 'flex',
+    textAlign: 'center',
+    gap: 5,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    borderColor: 'gray',
+    padding: 30,
+  },
   bodyFText:{
     fontSize: 18,
     textAlign: 'center',

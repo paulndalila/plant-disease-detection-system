@@ -2,7 +2,10 @@ import { useState, useRef } from "react"
 import axios from "axios";
 import Alert from '@mui/material/Alert';
 import image_icon from "./images/img.png";
+import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
 import CircularProgress from '@mui/material/CircularProgress';
+import { red } from '@mui/material/colors';
+
 
 const Home = () => {
     const fileInputRef = useRef(null);
@@ -88,8 +91,8 @@ const Home = () => {
             setImage(compressedImageDataURL);
     
             // Submit compressed image to the API     
-            // backend hosted on render - https://paulndalila-backend-api.onrender.com/
-            // backend hosted on AWS EC2 instance - http://16.171.64.119
+            // backend hosted on render - https://paulndalila-backend-api.onrender.com
+        // backend hosted on AWS EC2 instance - http://ec2-16-171-64-119.eu-north-1.compute.amazonaws.com or http://16.171.64.119
             const response = await axios.post('http://16.171.64.119/predict', formData);  
             if(response.data['class'] === '0' || response.data['accuracy'] === 0.0){
                 setIsImage(false);
@@ -147,27 +150,36 @@ const Home = () => {
                     <div className="drag_area result"  onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
                         <div className="image"><img src={ image } alt="crop-img"/></div>
                         <div className="details">
-                            { isImage?
-                                <>
-                                    <div>
+                            <div>
+                                
+                                { isImage? 
+                                    <>
                                         <h3>Potato health status</h3>
                                         <hr/>
                                         <p className="class"><b>{ data['class'] }</b></p>
-                                    </div>
-                                    <div>
+                                    </> 
+                                : 
+                                    <p className="class_not_leaf">Not a leaf!</p> 
+                                }
+                            </div>
+                            <div>
+                                
+                                { isImage? 
+                                    <>
                                         <h3>Accuracy</h3>
                                         <hr/>
                                         <p className="accuracy"><b>{ accuracyCalc(data['accuracy']) }%</b></p>
-                                    </div>
-                                    <div className="btn">
-                                        <button onClick={selectNewCrop}>Check another crop</button>
-                                    </div>
-                                </>
-                                :
-                                <>
-                                    <h2 className="accuracy">Crop Oracle system did <u>not identify</u> the leaf in the image! <br/> Upload an image of a <u>crop leaf only</u> for <u>status detection</u>!</h2>
-                                </>                            
-                            }
+                                    </> 
+                                    :
+                                    <>
+                                        <ReportProblemRoundedIcon sx={{ fontSize: '100px', color: red[500] }} />
+                                    </>
+                                }
+                            </div>
+                            <div className="btn">
+                                <button onClick={selectNewCrop}>Check another crop</button>
+                            </div>
+                                
                         </div>
                     </div> :
                         <div className="drag_area" onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>

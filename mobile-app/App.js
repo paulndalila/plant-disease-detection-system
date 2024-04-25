@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, Image, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, Image, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
 import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
-import { Camera, camera } from 'expo-camera';
+import { Camera } from 'expo-camera';
 import Welcome from './Welcome';
 import back1 from './assets/backa.jpg';
 import leaf from './assets/leaf.png';
@@ -21,6 +21,7 @@ export default function App() {
   const [isImageSet, setIsImageSet] = useState(false);  
   const [ cropAccuracy, setCropAccuracy ] = useState('');
   const [ isCameraSet, setIsCameraSet ] = useState(false);
+  const [ isALeaf, setIsALeaf ] = useState(false);
   const [ resultsAvailable, setResultsAvailable] = useState(false);
   const [ hasCameraPermission, setHasCameraPermission] = useState();
 
@@ -115,8 +116,8 @@ export default function App() {
           type: 'image/jpeg',
         });
 
-  	    // backend hosted on render - https://paulndalila-backend-api.onrender.com/
-	      // backend hosted on AWS EC2 instance - http://16.171.64.119
+  	    // backend hosted on render - https://paulndalila-backend-api.onrender.com
+	      // backend hosted on AWS EC2 instance - http://ec2-16-171-64-119.eu-north-1.compute.amazonaws.com or http://16.171.64.119
         const response = await axios.post('http://16.171.64.119/predict', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -124,6 +125,13 @@ export default function App() {
         });
         setCropClass(response.data.class);
         setCropAccuracy(response.data.accuracy);
+
+        if((response.data.class) === 'Not a leaf' || (response.data.accuracy) === 0.0){
+          setIsALeaf(false)
+        }else{
+          setIsALeaf(true)
+        }
+        
         setResultsAvailable(true);
   
       } catch (error) {
@@ -158,7 +166,7 @@ export default function App() {
 
   return (
     <>
-      <StatusBar backgroundColor="#fff" barStyle="light-content" />
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       { isCameraSet?
         <Camera style={styles.container} ref={cameraRef}>
           <View style={styles.container}>
@@ -194,7 +202,10 @@ export default function App() {
                       : 
                       (image? 
                         <>
-                          <Button title="Check Status" color="#017260" onPress={uploadImage} />
+                          <TouchableOpacity onPress={uploadImage} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1976D2', borderRadius: 5, padding: 10 }}>
+                            <Text style={{ color: '#fff', fontSize: 16 }}>Check Status</Text>
+                            <Icon name="upload" size={18} color="#fff" style={{ marginLeft: 5 }} />
+                          </TouchableOpacity>
                           <Button icon={<Icon name="undo" size={25} color="#017260" /> } type="clear" onPress={resetView} />
                         </> 
                         : 
@@ -219,8 +230,8 @@ export default function App() {
                       <>
                         <Text>Results:</Text>
                         <View style={styles.imageResults}>
-                          <Text style={styles.imageCResults}>{ cropClass }</Text>
-                          <Text style={styles.imageAResults}>{ accuracyCalc(cropAccuracy) }%</Text>
+                          { isALeaf? <Text style={styles.imageCResults}>{ cropClass }</Text> : <Text style={styles.imageCResults}>Not a Crop Leaf!</Text> }
+                          { isALeaf? <Text style={styles.imageAResults}>{ accuracyCalc(cropAccuracy) }%</Text> : <Icon name="close" color="red" size={44} style={styles.icon} /> }
                         </View>
                       </>
                     
@@ -363,5 +374,8 @@ const styles = StyleSheet.create({
     height: '100%',
     objectFit: 'cover',
     zIndex: -99,
+  },
+  icon: {
+    marginRight: 40,
   },
 });

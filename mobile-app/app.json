@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "PDDS",
-    "slug": "mobile-app",
-    "version": "1.0.0",
+    "slug": "Crop-Oracle",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/iconn.png",
     "userInterfaceStyle": "light",

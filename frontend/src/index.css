@@ -243,7 +243,13 @@ nav .banner{
 /* footer */
 body{
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
+}
+
+.details p.class_not_leaf{
+  font-size: 30px;
+  color: #1b1c1e;
+  font-weight: bold;
 }
 
 footer{
@@ -285,6 +291,10 @@ footer a{
     background-image: url('./images/banner2.svg');
   }
 
+  .card .result{
+    flex-direction: column;
+  
+  }
 
   .card .result .image{
     width: 60%;
@@ -292,8 +302,11 @@ footer a{
   }
   
   .card .result .details{
-    width: 45%;
-    gap: 30px;
+    width: 100%;
+    gap: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
     height: fit-content;
   }
   
